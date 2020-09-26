@@ -75,6 +75,8 @@ public class NumberGuesserHW {
 				}
 			}
 		}
+		saveLevel(); // Since we're trying to save current strikes/number, it should be saved after
+						// the function is over
 	}
 
 	private int getGuess(String message) {
@@ -91,6 +93,8 @@ public class NumberGuesserHW {
 	private void saveLevel() {
 		try (FileWriter fw = new FileWriter(saveFile)) {
 			fw.write("" + level);// here we need to convert it to a String to record correctly
+			fw.write("" + strikes); // same way as above function to record the # of strikes
+			fw.write("" + number); // same way as above function to record the number
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,6 +109,10 @@ public class NumberGuesserHW {
 		try (Scanner reader = new Scanner(file)) {
 			while (reader.hasNextLine()) {
 				int _level = reader.nextInt();
+				int NumOfStrikes = reader.nextInt(); // I think this should read # of strikes?
+				strikes = NumOfStrikes; // this should set it from the previous function ^
+				int NumOfNumbers = reader.nextInt();
+				number = NumOfNumbers; // same as above
 				if (_level > 1) {
 					level = _level;
 					break;
