@@ -212,6 +212,7 @@ public class ClientUI extends JFrame implements Event {
 
 	void addMessage(String str) {
 		JEditorPane entry = new JEditorPane();
+		entry.setContentType("text/html"); // can use tags to bold/italics example: <b>bold</b>
 		entry.setEditable(false);
 		// entry.setLayout(null);
 		entry.setText(str);
