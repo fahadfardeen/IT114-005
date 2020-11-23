@@ -3,6 +3,7 @@ package server;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +17,7 @@ public class Room implements AutoCloseable {
 	private final static String CREATE_ROOM = "createroom";
 	private final static String JOIN_ROOM = "joinroom";
 	private final static String FLIP = "flip";
+	private final static String ROLL = "roll";
 
 	public Room(String name) {
 		this.name = name;
@@ -121,20 +123,35 @@ public class Room implements AutoCloseable {
 					wasCommand = true;
 					break;
 				case FLIP:
-
-					if (Math.random() < 0.5) {
-						System.out.println("Heads");
-					} else {
-						System.out.println("Tails");
-					}
+					String[] flipcoin = new String[] { "heads", "tails" };
+					Random randomFlip = new Random();
+					int aFlip = randomFlip.nextInt(flipcoin.length);
+					chatCommand(client, flipcoin[aFlip]);
 					wasCommand = true;
 					break;
+				case ROLL:
+					String[] die = new String[] { "1", "2", "3" };
+					Random randomDie = new Random();
+					int bRoll = randomDie.nextInt(die.length);
+					chatCommand(client, die[bRoll]);
+					wasCommand = true;
+					break;
+
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return wasCommand;
+	}
+
+	protected void chatCommand(ServerThread client, String message) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread c = iter.next();
+			c.send(client.getClientName(), message);
+		}
+
 	}
 
 	// TODO changed from string to ServerThread
