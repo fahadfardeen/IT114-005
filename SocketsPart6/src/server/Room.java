@@ -3,6 +3,7 @@ package server;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+//imported random
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,8 +17,14 @@ public class Room implements AutoCloseable {
 	private final static String COMMAND_TRIGGER = "/";
 	private final static String CREATE_ROOM = "createroom";
 	private final static String JOIN_ROOM = "joinroom";
+	// adding commands for flip, roll, @, mute, unmute, and html
 	private final static String FLIP = "flip";
 	private final static String ROLL = "roll";
+	private final static String HTML = "html";
+	private final static String COLOR = "color";
+	private final static String AT = "@";
+	private final static String MUTE = "mute";
+	private final static String UNMUTE = "unmute";
 
 	public Room(String name) {
 		this.name = name;
@@ -122,36 +129,70 @@ public class Room implements AutoCloseable {
 					joinRoom(roomName, client);
 					wasCommand = true;
 					break;
-				case FLIP:
-					String[] flipcoin = new String[] { "heads", "tails" };
-					Random randomFlip = new Random();
-					int aFlip = randomFlip.nextInt(flipcoin.length);
-					chatCommand(client, flipcoin[aFlip]);
-					wasCommand = true;
-					break;
+				// adding /roll command
 				case ROLL:
 					String[] die = new String[] { "1", "2", "3" };
-					Random randomDie = new Random();
-					int bRoll = randomDie.nextInt(die.length);
-					chatCommand(client, die[bRoll]);
+					Random random = new Random();
+					int index = random.nextInt(die.length);
+					sendCommand(client, "<b>rolled " + "<font color=\"green\">" + die[index] + "</font></b>");
+					wasCommand = true;
+					break;
+				// adding /flip command
+				case FLIP:
+					String[] coin = new String[] { "heads", "tails" };
+					Random random2 = new Random();
+					int index2 = random2.nextInt(coin.length);
+					sendCommand(client, "<b>flipped " + "<font color=\"green\">" + coin[index2] + "</font></b>");
 					wasCommand = true;
 					break;
 
+				case COLOR:
+					String fontColor = comm2[1];
+					String eraseCommand = message.replaceAll("/color " + fontColor, "");
+					eraseCommand = eraseCommand.replaceAll("!c", "<font color=" + "\"" + fontColor + "\"" + ">");
+
+					sendCommand(client, eraseCommand);
+					wasCommand = true;
+					break;
+				case MUTE:
+					String MUser = comm2[1];
+					client.mutedList.add(MUser);
+					// maybe add a notification that the user was muted
+					wasCommand = true;
+					break;
+				case UNMUTE:
+					String UMUser = comm2[1];
+					client.mutedList.remove(UMUser);
+					// maybe add a notification that the user was unmuted
+					wasCommand = true;
+					break;
+				/*
+				 * @username private message command experiment case AT_SIGN: String uName =
+				 * comm2[1]; String deleteAT = message.replaceAll("/dm " + uName, "");
+				 * sendPrivate(client, uName, deleteAT); wasCommand = true; break;
+				 */
 				}
 			}
+
+			// added @user message private dm feature here
+			if (message.indexOf(AT) > -1) {
+				String[] trigger = message.split(AT);
+				log.log(Level.INFO, message);
+				String part1 = trigger[1];
+				String[] comm2 = part1.split(" ");
+				String uName = comm2[0];
+				if (uName != null) {
+					uName = uName.toLowerCase();
+				}
+				String delUName = message.replaceAll("@" + uName, "");
+				sendPrivate(client, uName, delUName);
+				wasCommand = true;
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return wasCommand;
-	}
-
-	protected void chatCommand(ServerThread client, String message) {
-		Iterator<ServerThread> iter = clients.iterator();
-		while (iter.hasNext()) {
-			ServerThread c = iter.next();
-			c.send(client.getClientName(), message);
-		}
-
 	}
 
 	// TODO changed from string to ServerThread
@@ -163,6 +204,26 @@ public class Room implements AutoCloseable {
 			if (!messageSent) {
 				iter.remove();
 				log.log(Level.INFO, "Removed client " + c.getId());
+			}
+		}
+	}
+
+	// edited sendconnection status to get rid of bug with user list ui
+	protected void sendCommand(ServerThread client, String message) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread c = iter.next();
+			c.send(client.getClientName(), message);
+		}
+	}
+
+	// creating a function for privately sending messages to a user
+	protected void sendPrivate(ServerThread client, String recipient, String message) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread c = iter.next();
+			if (c.getClientName().equals(recipient) || c.getClientName() == client.getClientName()) {
+				c.send(client.getClientName(), message);
 			}
 		}
 	}
@@ -184,10 +245,12 @@ public class Room implements AutoCloseable {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread client = iter.next();
-			boolean messageSent = client.send(sender.getClientName(), message);
-			if (!messageSent) {
-				iter.remove();
-				log.log(Level.INFO, "Removed client " + client.getId());
+			if (!client.isMuted(sender.getClientName())) {
+				boolean messageSent = client.send(sender.getClientName(), message);
+				if (!messageSent) {
+					iter.remove();
+					log.log(Level.INFO, "Removed client " + client.getId());
+				}
 			}
 		}
 	}
