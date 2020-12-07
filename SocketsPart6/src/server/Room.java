@@ -3,7 +3,6 @@ package server;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-//imported random
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -167,7 +166,6 @@ public class Room implements AutoCloseable {
 				}
 			}
 
-			// added @user message private dm feature here
 			if (message.indexOf(AT) > -1) {
 				String[] trigger = message.split(AT);
 				log.log(Level.INFO, message);
