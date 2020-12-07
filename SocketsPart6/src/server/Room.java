@@ -150,11 +150,13 @@ public class Room implements AutoCloseable {
 					userCommand(client, "<b>rolled " + "<font color=\"green\">" + die[index] + "</font></b>");
 					wasCommand = true;
 					break;
+
 				case MUTE:
 					String MuteUser = comm2[1];
 					client.mutedList.add(MuteUser);
 					wasCommand = true;
 					break;
+
 				case UNMUTE:
 					String UnmuteUser = comm2[1];
 					client.mutedList.remove(UnmuteUser);
@@ -197,14 +199,6 @@ public class Room implements AutoCloseable {
 		}
 	}
 
-	protected void userCommand(ServerThread client, String message) {
-		Iterator<ServerThread> iter = clients.iterator();
-		while (iter.hasNext()) {
-			ServerThread c = iter.next();
-			c.send(client.getClientName(), message);
-		}
-	}
-
 	// creating a function for privately sending messages to a user
 	protected void sendPrivate(ServerThread client, String recipient, String message) {
 		Iterator<ServerThread> iter = clients.iterator();
@@ -224,6 +218,14 @@ public class Room implements AutoCloseable {
 	 * @param sender  The client sending the message
 	 * @param message The message to broadcast inside the room
 	 */
+	protected void userCommand(ServerThread client, String message) {
+		Iterator<ServerThread> iter = clients.iterator();
+		while (iter.hasNext()) {
+			ServerThread c = iter.next();
+			c.send(client.getClientName(), message);
+		}
+	}
+
 	protected void sendMessage(ServerThread sender, String message) {
 		log.log(Level.INFO, getName() + ": Sending message to " + clients.size() + " clients");
 		if (processCommands(message, sender)) {
