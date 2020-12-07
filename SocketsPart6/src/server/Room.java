@@ -13,18 +13,16 @@ public class Room implements AutoCloseable {
 	private String name;
 	private final static Logger log = Logger.getLogger(Room.class.getName());
 
-	// Commands
 	private final static String COMMAND_TRIGGER = "/";
 	private final static String CREATE_ROOM = "createroom";
 	private final static String JOIN_ROOM = "joinroom";
-	// adding commands for flip, roll, @, mute, unmute, and html
-	private final static String FLIP = "flip";
 	private final static String ROLL = "roll";
+	private final static String FLIP = "flip";
 	private final static String HTML = "html";
 	private final static String COLOR = "color";
 	private final static String AT = "@";
-	private final static String MUTE = "mute";
 	private final static String UNMUTE = "unmute";
+	private final static String MUTE = "mute";
 
 	public Room(String name) {
 		this.name = name;
@@ -129,20 +127,12 @@ public class Room implements AutoCloseable {
 					joinRoom(roomName, client);
 					wasCommand = true;
 					break;
-				// adding /roll command
-				case ROLL:
-					String[] die = new String[] { "1", "2", "3" };
-					Random random = new Random();
-					int index = random.nextInt(die.length);
-					sendCommand(client, "<b>rolled " + "<font color=\"green\">" + die[index] + "</font></b>");
-					wasCommand = true;
-					break;
-				// adding /flip command
+
 				case FLIP:
 					String[] coin = new String[] { "heads", "tails" };
 					Random random2 = new Random();
 					int index2 = random2.nextInt(coin.length);
-					sendCommand(client, "<b>flipped " + "<font color=\"green\">" + coin[index2] + "</font></b>");
+					userCommand(client, "<b>flipped " + "<font color=\"green\">" + coin[index2] + "</font></b>");
 					wasCommand = true;
 					break;
 
@@ -151,26 +141,27 @@ public class Room implements AutoCloseable {
 					String eraseCommand = message.replaceAll("/color " + fontColor, "");
 					eraseCommand = eraseCommand.replaceAll("!c", "<font color=" + "\"" + fontColor + "\"" + ">");
 
-					sendCommand(client, eraseCommand);
+					userCommand(client, eraseCommand);
+					wasCommand = true;
+					break;
+				case ROLL:
+					String[] die = new String[] { "1", "2", "3" };
+					Random random = new Random();
+					int index = random.nextInt(die.length);
+					userCommand(client, "<b>rolled " + "<font color=\"green\">" + die[index] + "</font></b>");
 					wasCommand = true;
 					break;
 				case MUTE:
-					String MUser = comm2[1];
-					client.mutedList.add(MUser);
-					// maybe add a notification that the user was muted
+					String MuteUser = comm2[1];
+					client.mutedList.add(MuteUser);
 					wasCommand = true;
 					break;
 				case UNMUTE:
-					String UMUser = comm2[1];
-					client.mutedList.remove(UMUser);
-					// maybe add a notification that the user was unmuted
+					String UnmuteUser = comm2[1];
+					client.mutedList.remove(UnmuteUser);
 					wasCommand = true;
 					break;
-				/*
-				 * @username private message command experiment case AT_SIGN: String uName =
-				 * comm2[1]; String deleteAT = message.replaceAll("/dm " + uName, "");
-				 * sendPrivate(client, uName, deleteAT); wasCommand = true; break;
-				 */
+
 				}
 			}
 
@@ -208,8 +199,7 @@ public class Room implements AutoCloseable {
 		}
 	}
 
-	// edited sendconnection status to get rid of bug with user list ui
-	protected void sendCommand(ServerThread client, String message) {
+	protected void userCommand(ServerThread client, String message) {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread c = iter.next();
