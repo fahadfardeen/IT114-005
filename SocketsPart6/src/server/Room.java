@@ -17,9 +17,7 @@ public class Room implements AutoCloseable {
 	private final static String JOIN_ROOM = "joinroom";
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
-	private final static String HTML = "html";
 	private final static String COLOR = "color";
-	private final static String AT = "@";
 	private final static String UNMUTE = "unmute";
 	private final static String MUTE = "mute";
 
@@ -131,7 +129,9 @@ public class Room implements AutoCloseable {
 					String[] coin = new String[] { "heads", "tails" };
 					Random random2 = new Random();
 					int index2 = random2.nextInt(coin.length);
-					userCommand(client, "<b>flipped " + "<font color=\"green\">" + coin[index2] + "</font></b>");
+
+					userCommand(client, "<font color=\"green\">" + "<b>flipped " + "<font color=\"green\">"
+							+ coin[index2] + "</font></b>");
 					wasCommand = true;
 					break;
 
@@ -147,7 +147,8 @@ public class Room implements AutoCloseable {
 					String[] die = new String[] { "1", "2", "3" };
 					Random random = new Random();
 					int index = random.nextInt(die.length);
-					userCommand(client, "<b>rolled " + "<font color=\"green\">" + die[index] + "</font></b>");
+					userCommand(client, "<font color=\"green\">" + "<b>rolled " + "<font color=\"green\">" + die[index]
+							+ "</font></b>");
 					wasCommand = true;
 					break;
 
@@ -164,20 +165,6 @@ public class Room implements AutoCloseable {
 					break;
 
 				}
-			}
-
-			if (message.indexOf(AT) > -1) {
-				String[] trigger = message.split(AT);
-				log.log(Level.INFO, message);
-				String part1 = trigger[1];
-				String[] comm2 = part1.split(" ");
-				String uName = comm2[0];
-				if (uName != null) {
-					uName = uName.toLowerCase();
-				}
-				String delUName = message.replaceAll("@" + uName, "");
-				sendPrivate(client, uName, delUName);
-				wasCommand = true;
 			}
 
 		} catch (Exception e) {
